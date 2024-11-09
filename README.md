@@ -1,28 +1,47 @@
-# Mac自动切换输入法
-## ---------------------------------------- 动动您发财的小手点个Star 
+# 🤖 Mac自动切换输入法 (AI助手开发)
 
-## 应用截图
+一个使用 AI 辅助开发的 macOS 输入法切换工具，通过 Cursor AI 零代码开发。
 
-<img width="899" alt="image" src="https://github.com/ArcGalaxy/AutoInputSource/assets/164182770/f729eec4-9242-4207-9667-0e75b101b9bc">
+![软件界面截图](./iShot_2024-11-09_19.25.12.png)
 
-## 功能介绍
-目前已经实现基础功能, 获取当前mac活动应用, 目前只配置了微信输入法, 搜狗输入法, 和mac自带的英文,中文输入法, 扩展其他输入法如下图添加即可.
-<img width="947" alt="image" src="https://github.com/ArcGalaxy/AutoInputSource/assets/164182770/89ae4998-485e-4f25-9ce9-9ad4fd2a0eaa">
+## 功能特点
 
-<!--
-## 已知问题
-状态栏的输入法已经切换成功, 实际输入为上次的输入法，或者切换目标窗口后输入法才正确。
--->
-## 作者联系方式(添加说明来意)
-#### 邮箱：ash_mica@163.com
-#### 微信: wxid-thegalaxy
+- 自动检测当前激活的应用程序
+- 根据应用程序自动切换到预设的输入法
+- 状态栏图标，后台静默运行
+- 点击状态栏图标显示配置界面
+- 优化了输入法切换的成功率
+- 简洁的用户界面，易于配置
+- AI 设计的应用图标，简洁现代
 
-### 微信二维码
-<img width="300" alt="image" src="https://github.com/ArcGalaxy/AutoInputSource/assets/164182770/98412fef-6970-44bc-ab1b-9f25e6b8b89e">
+## 开发特色
 
+本项目是一个完全由 AI 辅助开发的应用程序：
+- 使用 Cursor AI 进行全程代码开发
+- 通过 AI 进行界面设计和优化
+- 应用图标由 AI 设计工具生成
+- 零编程基础实现功能开发
 
-## 请喝杯咖啡☕️
-<img width="300" alt="image" src="https://github.com/ArcGalaxy/AutoInputSource/assets/164182770/fa54e425-73bd-4bc1-b225-c53bce7fa78d">
+## 更新内容
 
+相比原版本改进：
+- 优化了输入法切换逻辑，提高了切换的成功率
+- 移除了独立窗口，改为状态栏模式运行
+- 默认启动到状态栏后台运行，不显示主窗口
+- 点击状态栏图标显示悬浮配置窗口
+- 增加了退出应用按钮
+- 界面更加简洁直观
+- 全新的 AI 设计图标
 
-<img width="300" alt="image" src="https://github.com/ArcGalaxy/AutoInputSource/assets/164182770/c1702738-3715-44f8-98c0-bc0cc755cae2">
+## 原作者
+- 邮箱：ash_mica@163.com
+
+## 当前维护者
+- 邮箱：happnuyear@sina.com
+
+## 开发工具
+- Cursor AI：代码开发和优化
+- 豆包：应用图标设计
+
+## 致谢
+感谢原作者开发的优秀工具，本版本在其基础上通过 AI 辅助进行了功能优化和界面改进。这个项目也证明了 AI 辅助开发工具在实际应用中的强大潜力。
