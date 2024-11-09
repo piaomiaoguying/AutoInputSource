@@ -73,82 +73,54 @@ class AppListViewModel: ObservableObject {
 }
 
 struct ConfigRow: View {
-  var appInfo: AppInfo
-  @Binding var shouldSwitchInputMethod: Bool
-  @Binding var selectedInputMethod: String
-  // 添加一个字典来存储输入法选项
-  var inputMethodOptions: [String: String]
+    var appInfo: AppInfo
+    @Binding var shouldSwitchInputMethod: Bool
+    @Binding var selectedInputMethod: String
+    // 创建一个可变的输入法选项字典
+    var inputMethodOptions: [String: String]
 
-  init(
-    appInfo: AppInfo, shouldSwitchInputMethod: Binding<Bool>, selectedInputMethod: Binding<String>,
-    inputMethodOptions: [String: String]
-  ) {
-    self.appInfo = appInfo
-    self._shouldSwitchInputMethod = shouldSwitchInputMethod
-    self._selectedInputMethod = selectedInputMethod
+    init(
+        appInfo: AppInfo, 
+        shouldSwitchInputMethod: Binding<Bool>, 
+        selectedInputMethod: Binding<String>,
+        inputMethodOptions: [String: String]
+    ) {
+        self.appInfo = appInfo
+        self._shouldSwitchInputMethod = shouldSwitchInputMethod
+        self._selectedInputMethod = selectedInputMethod
+        
+        // 创建一个新的字典，包含原有选项和空选项
+        var options = inputMethodOptions
+        options[""] = ""
+        self.inputMethodOptions = options
+    }
 
-    self.inputMethodOptions = inputMethodOptions  // 使用传入的输入法选项字典
-    self.inputMethodOptions[""] = ""
-    // 设置默认选择为第一个非空标签
-    //           if let firstOptionKey = inputMethodOptions.first?.key {
-    //               self._selectedInputMethod = State(initialValue: firstOptionKey)
-    //           } else {
-    //               self._selectedInputMethod = State(initialValue: "")
-    //           }
-      
-  }
-
-  // 加载输入法选项
-  //    private func loadInputMethodOptions() {
-  //        if let inputSourcesDictionary: [String: String] = DictionaryManager.shared.loadDictionary(forKey: "KeyboardIdentifierRevers"){
-  //            print("KeyboardIdentifierRevers: \(inputSourcesDictionary)")
-  //            self.inputMethodOptions = inputSourcesDictionary
-  //        } else {
-  //            print("No KeyboardIdentifierRevers info found.")
-  //        }
-  //    }
-
-  var body: some View {
-    HStack {
-      if let icon = appInfo.icon {
-        Image(nsImage: icon)
-          .resizable()
-          .aspectRatio(contentMode: .fit)
-          .frame(width: 44, height: 44)
-      }
-      Text(appInfo.name)
-      //            Text(appInfo.bundleIdentifier)
-      Spacer()
-      //            Toggle("", isOn: $shouldSwitchInputMethod)
-      //                .labelsHidden()
-      //            if shouldSwitchInputMethod {
-      //                Picker("", selection: $selectedInputMethod) {
-      //                    Text("-").tag("")
-      //                    Text("English").tag("com.apple.keylayout.US")
-      //                    Text("中文").tag("com.apple.keylayout.Zhuyin")
-      //                    Text("腾讯中文").tag("com.tencent.inputmethod.wetype.pinyin")
-      //
-      //                    // 添加其他输入法选项
-      //                }
-      Picker("", selection: $selectedInputMethod) {
-        ForEach(inputMethodOptions.keys.sorted(), id: \.self) { key in
-          Text(inputMethodOptions[key] ?? "")  // 使用默认值 "-"，如果键不存在则显示 "-"
-            .tag(key)
+    var body: some View {
+        HStack {
+            if let icon = appInfo.icon {
+                Image(nsImage: icon)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 44, height: 44)
+            }
+            Text(appInfo.name)
+            Spacer()
+            
+            Picker("", selection: $selectedInputMethod) {
+                ForEach(inputMethodOptions.keys.sorted(), id: \.self) { key in
+                    Text(inputMethodOptions[key] ?? "")
+                        .tag(key)
+                }
+            }
+            .frame(width: 100)
+            .labelsHidden()
+            .onChange(of: selectedInputMethod) { _, newValue in
+                handleInputMethodSelectionChange(appInfo: appInfo, newValue: newValue)
+            }
         }
-      }
-      .frame(width: 100)
-      .labelsHidden()
-      .onChange(of: selectedInputMethod) { newValue in
-        // 在这里执行在选择变化时要执行的操作
-        handleInputMethodSelectionChange(appInfo: appInfo, newValue: newValue)
-      }
-      //            }
-    }.padding(.leading, 20)
-      .padding(.trailing, 20)
-    //            .padding(.top, 10)
-    //            .padding(.bottom, 10)
-  }
-
+        .padding(.leading, 20)
+        .padding(.trailing, 20)
+    }
 }
 
 struct UserAppConfig: View {
@@ -158,7 +130,7 @@ struct UserAppConfig: View {
   var body: some View {
     VStack {
       List(viewModel.appList.indices, id: \.self) { index in
-        if var inputMethodOptions: [String: String] = DictionaryManager.shared.loadDictionary(
+        if let inputMethodOptions: [String: String] = DictionaryManager.shared.loadDictionary(
           forKey: "KeyboardIdentifier")
         {
           ConfigRow(

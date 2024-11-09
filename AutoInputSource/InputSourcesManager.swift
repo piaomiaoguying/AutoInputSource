@@ -24,7 +24,16 @@ class InputSourcesManager {
 
     //    从UserDefaults中检索输入法字典
     func loadInputSourcesDictionary() -> [String: String]? {
-        return defaults.dictionary(forKey: inputSourcesKey) as? [String: String]
+        if let data = UserDefaults.standard.data(forKey: inputSourcesKey) {
+            do {
+                let dictionary = try NSKeyedUnarchiver.unarchivedObject(ofClass: NSDictionary.self, from: data) as? [String: String]
+                return dictionary
+            } catch {
+                Logger.error("解档失败：\(error.localizedDescription)")
+                return nil
+            }
+        }
+        return nil
     }
     //向输入法字典中添加新的输入法
     func addInputSource(name: String, identifier: String) {
@@ -55,42 +64,64 @@ class TISInputSourceManager {
 
     private init() {}
 
-    // 将 TISInputSource 字典存储在 UserDefaults 中
-    func saveTISInputSourcesDictionary(_ tisInputSourcesDictionary: [String: TISInputSource]) {
-        let encodedData = try? NSKeyedArchiver.archivedData(withRootObject: tisInputSourcesDictionary, requiringSecureCoding: false)
-        defaults.set(encodedData, forKey: tisInputSourcesKey)
-        
+    // 将输入法ID存储在 UserDefaults 中
+    func saveTISInputSourcesDictionary(_ tisInputSourcesDictionary: [String: String]) {
+        defaults.set(tisInputSourcesDictionary, forKey: tisInputSourcesKey)
     }
       
-    // 从 UserDefaults 中检索 TISInputSource 字典
+    // 从 UserDefaults 中检索输入法ID，并转换为 TISInputSource
     func loadTISInputSourcesDictionary() -> [String: TISInputSource]? {
-        if let encodedData = defaults.data(forKey: tisInputSourcesKey) {
-            
-            return try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(encodedData) as? [String: TISInputSource]
+        guard let savedDictionary = defaults.dictionary(forKey: tisInputSourcesKey) as? [String: String] else {
+            return nil
         }
-        return nil
-      
+        
+        var result: [String: TISInputSource] = [:]
+        
+        // 获取所有可用的输入法
+        if let inputSourceList = TISCreateInputSourceList(nil, false)?.takeRetainedValue() as? [TISInputSource] {
+            for inputSource in inputSourceList {
+                if let inputSourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+                    let id = Unmanaged<CFString>.fromOpaque(inputSourceID).takeUnretainedValue() as String
+                    // 如果这个输入法在保存的字典中，就添加到结果中
+                    if savedDictionary.values.contains(id) {
+                        for (key, value) in savedDictionary {
+                            if value == id {
+                                result[key] = inputSource
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return result
     }
 
     // 向 TISInputSource 字典中添加新的输入法
     func addTISInputSource(name: String, inputSource: TISInputSource) {
-        var tisInputSourcesDictionary = loadTISInputSourcesDictionary() ?? [:]
-        tisInputSourcesDictionary[name] = inputSource
-        saveTISInputSourcesDictionary(tisInputSourcesDictionary)
+        var tisInputSourcesDictionary = defaults.dictionary(forKey: tisInputSourcesKey) as? [String: String] ?? [:]
+        if let inputSourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+            let id = Unmanaged<CFString>.fromOpaque(inputSourceID).takeUnretainedValue() as String
+            tisInputSourcesDictionary[name] = id
+            saveTISInputSourcesDictionary(tisInputSourcesDictionary)
+        }
     }
 
     // 从 TISInputSource 字典中移除指定的输入法
     func removeTISInputSource(name: String) {
-        var tisInputSourcesDictionary = loadTISInputSourcesDictionary() ?? [:]
+        var tisInputSourcesDictionary = defaults.dictionary(forKey: tisInputSourcesKey) as? [String: String] ?? [:]
         tisInputSourcesDictionary.removeValue(forKey: name)
         saveTISInputSourcesDictionary(tisInputSourcesDictionary)
     }
 
     // 更新 TISInputSource 字典中指定输入法的值
     func updateTISInputSource(name: String, inputSource: TISInputSource) {
-        var tisInputSourcesDictionary = loadTISInputSourcesDictionary() ?? [:]
-        tisInputSourcesDictionary[name] = inputSource
-        saveTISInputSourcesDictionary(tisInputSourcesDictionary)
+        if let inputSourceID = TISGetInputSourceProperty(inputSource, kTISPropertyInputSourceID) {
+            var tisInputSourcesDictionary = defaults.dictionary(forKey: tisInputSourcesKey) as? [String: String] ?? [:]
+            let id = Unmanaged<CFString>.fromOpaque(inputSourceID).takeUnretainedValue() as String
+            tisInputSourcesDictionary[name] = id
+            saveTISInputSourcesDictionary(tisInputSourcesDictionary)
+        }
     }
 }
 
